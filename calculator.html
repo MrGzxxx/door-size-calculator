@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>工业门尺寸与价格估算器</title>
+<style>
+  :root { --blue:#1f4e79; --bg:#f5f7fa; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"Microsoft YaHei","PingFang SC",sans-serif; background:var(--bg); color:#222; }
+  .card { max-width:560px; margin:40px auto; background:#fff; border-radius:12px; padding:28px 30px; box-shadow:0 4px 24px rgba(0,0,0,.08); }
+  h1 { font-size:20px; margin:0 0 4px; color:var(--blue); }
+  .sub { color:#888; font-size:13px; margin-bottom:20px; }
+  label { display:block; font-size:14px; margin:14px 0 6px; color:#444; }
+  select,input { width:100%; padding:10px 12px; font-size:15px; border:1px solid #d5dbe3; border-radius:8px; background:#fff; }
+  .row { display:flex; gap:12px; }
+  .row > div { flex:1; }
+  button { width:100%; margin-top:22px; padding:12px; font-size:16px; border:0; border-radius:8px; background:var(--blue); color:#fff; cursor:pointer; }
+  button:hover { background:#16395c; }
+  #result { display:none; margin-top:22px; padding:16px 18px; background:#f0f6ff; border:1px solid #d6e4f7; border-radius:10px; font-size:14px; line-height:1.9; }
+  .num { color:var(--blue); font-weight:700; }
+  .warn { color:#b45309; }
+  .foot { margin-top:10px; color:#999; font-size:12px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>工业门尺寸与价格估算器</h1>
+  <div class="sub">快速卷帘门 / 硬质快速门 / 工业滑升门 / 堆积门 / 卷帘门 · 离线可用</div>
+
+  <label>门型</label>
+  <select id="type"></select>
+
+  <div class="row">
+    <div>
+      <label>门洞宽度（米）</label>
+      <input id="w" type="number" step="0.1" min="0.5" value="3.0">
+    </div>
+    <div>
+      <label>门洞高度（米）</label>
+      <input id="h" type="number" step="0.1" min="0.5" value="3.0">
+    </div>
+    <div>
+      <label>数量（樘）</label>
+      <input id="qty" type="number" step="1" min="1" value="1">
+    </div>
+  </div>
+
+  <button onclick="calc()">估 算</button>
+
+  <div id="result"></div>
+  <div class="foot">估价仅供参考，实际以现场测量与正式报价为准。</div>
+</div>
+
+<script>
+const DOOR_TYPES = {
+  "快速卷帘门": { price_low: 550,  price_high: 900,  max_w: 6.0, max_h: 6.0 },
+  "硬质快速门": { price_low: 1500, price_high: 2800, max_w: 8.0, max_h: 8.0 },
+  "工业滑升门": { price_low: 380,  price_high: 750,  max_w: 8.0, max_h: 8.5 },
+  "堆积门":     { price_low: 450,  price_high: 850,  max_w: 7.0, max_h: 8.0 },
+  "卷帘门":     { price_low: 160,  price_high: 380,  max_w: 6.5, max_h: 6.5 }
+};
+
+const sel = document.getElementById('type');
+for (const name in DOOR_TYPES) {
+  const opt = document.createElement('option');
+  opt.value = opt.textContent = name;
+  sel.appendChild(opt);
+}
+
+function fmt(n) { return n.toLocaleString('zh-CN', { maximumFractionDigits: 0 }); }
+
+function calc() {
+  const t = sel.value, info = DOOR_TYPES[t];
+  const w = parseFloat(document.getElementById('w').value);
+  const h = parseFloat(document.getElementById('h').value);
+  const qty = parseInt(document.getElementById('qty').value || '1', 10);
+  const box = document.getElementById('result');
+  if (!(w > 0) || !(h > 0) || !(qty > 0)) {
+    box.style.display = 'block';
+    box.textContent = '请输入有效的尺寸与数量';
+    return;
+  }
+
+  const area = w * h, total = area * qty;
+  const body = area * 1.08, guide = (h + 0.6) * 2;
+  const low = total * info.price_low, high = total * info.price_high;
+  const warns = [];
+  if (w > info.max_w) warns.push(`单樘宽度 ${w.toFixed(1)}m 超常规上限 ${info.max_w}m：可能需分节 / 加强或定制`);
+  if (h > info.max_h) warns.push(`单樘高度 ${h.toFixed(1)}m 超常规上限 ${info.max_h}m：可能需加强或定制`);
+
+  box.style.display = 'block';
+  box.innerHTML =
+    `门型：<b>${t}</b>　单樘：${w.toFixed(2)}m × ${h.toFixed(2)}m　数量：${qty}<br>` +
+    `单樘面积：<span class="num">${area.toFixed(2)} ㎡</span>　总面积：<span class="num">${total.toFixed(2)} ㎡</span><br>` +
+    `用料估算（单樘）：门体材料 ≈ <span class="num">${body.toFixed(2)} ㎡</span>　导轨/边柱 ≈ <span class="num">${guide.toFixed(1)} m</span><br>` +
+    `参考价：<span class="num">¥${fmt(low)} ~ ¥${fmt(high)}</span>（中值 ¥${fmt((low + high) / 2)}）` +
+    (warns.length ? `<br><span class="warn">⚠️ ${warns.join('<br>⚠️ ')}</span>` : '');
+}
+</script>
+</body>
+</html>
