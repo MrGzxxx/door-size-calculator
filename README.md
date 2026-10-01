@@ -45,6 +45,14 @@ python calculator.py --type 快速卷帘门 --w 3.0 --h 3.0 --qty 2
 - Python 版：编辑 `calculator.py` 顶部 `DOOR_TYPES` 中的 `price_low` / `price_high`
 - 网页版：编辑 `calculator.html` 中同名的 `DOOR_TYPES`
 
+## 常见问题（FAQ）
+
+**Q：估算结果和厂家正式报价差很多？**
+正常。默认单价是市场**示例**系数，且不含安装、税费、运输等；请按当地行情校准 `DOOR_TYPES` 后再做横向对比。
+
+**Q：网页版需要联网吗？**
+不需要。`calculator.html` 是单文件、纯本地计算，双击或拖入浏览器即可使用。
+
 ## 许可
 
 MIT License，可自由商用（保留版权声明即可）。
